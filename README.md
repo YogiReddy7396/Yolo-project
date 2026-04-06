@@ -23,7 +23,7 @@ This project presents an **AI-based Garbage Detection System** using the **YOLOv
 ---
 
 ## 🖼️ Sample Output
-![Garbage Detection](https://via.placeholder.com/800x400.png?text=Garbage+Detection+Output)
+![Garbage Detection](https://images.unsplash.com/photo-1581578731548-c64695cc6952)
 
 > Replace this image later with your project output screenshot
 
@@ -46,7 +46,7 @@ This project presents an **AI-based Garbage Detection System** using the **YOLOv
 ✔️ User authentication (JWT & bcrypt)  
 ✔️ Garbage report submission  
 ✔️ Google Maps location tracking  
-✔️ Admin dashboard for monitoring  
+✔️ Admin dashboard  
 ✔️ Email notifications  
 
 ---
@@ -54,7 +54,6 @@ This project presents an **AI-based Garbage Detection System** using the **YOLOv
 ## 🧠 Model Details
 - Model Used: YOLOv5  
 - Dataset: Custom garbage dataset  
-- Categories: Plastic, Glass, Metal, Paper, General Waste  
 
 ### 📊 Performance Metrics
 - Accuracy: **89.5%**  
@@ -71,11 +70,12 @@ yolo_project/
 ├── datasets/
 ├── yolov5/
 ├── web_app/
+│   └── server/
+│       └── server.js
 ├── notebooks/
 ├── best.pt
 ├── config.yaml
 ├── requirements.txt
-├── server.js
 └── README.md
 
 ```
@@ -100,9 +100,10 @@ npm install
 
 ```
 
-### 3️⃣ Run Backend Server
+### 3️⃣ Run the Server
 ```
 
+cd yolo_project/web_app/server
 node server.js
 
 ```
@@ -120,7 +121,6 @@ node server.js
 - Smart city waste management  
 - Public area monitoring  
 - Environmental protection  
-- Automated cleanliness systems  
 
 ---
 
@@ -128,9 +128,8 @@ node server.js
 - Real-time video detection  
 - Mobile application  
 - Cloud deployment  
-- IoT-based smart waste systems  
 
 ---
 
 ## 📌 Conclusion
-This project demonstrates how Artificial Intelligence and Web Technologies can be combined to solve real-world environmental problems. By using the YOLOv5 model, the system can accurately detect garbage and assist authorities in maintaining cleaner public spaces efficiently.
+This project demonstrates how Artificial Intelligence and Web Technologies can be combined to solve real-world environmental problems. By using YOLOv5, the system accurately detects garbage and helps maintain cleaner surroundings efficiently.
