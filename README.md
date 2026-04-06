@@ -23,7 +23,8 @@ This project presents an **AI-based Garbage Detection System** using the **YOLOv
 ---
 
 ## 🖼️ Sample Output
-![Garbage Detection](https://images.unsplash.com/photo-1581578731548-c64695cc6952)
+![Garbage Detection]<img width="575" height="879" alt="Screenshot 2026-04-06 174029" src="https://github.com/user-attachments/assets/bbfcfdbe-0016-4246-b831-f7a74c45a8de" />
+
 
 > Replace this image later with your project output screenshot
 
