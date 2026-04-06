@@ -1,0 +1,39 @@
+PROJECT REQUIREMENTS (req.txt)
+==============================
+
+I. NODE.JS PACKAGES (Backend)
+-----------------------------
+Location: /web_app/server/package.json
+Install with: npm install
+
+- express       : Web framework for handling API requests and serving files.
+- sequelize     : ORM (Object-Relational Mapping) to interact with the database easily.
+- sqlite3       : The database engine used to store data in a file.
+- multer        : Middleware for handling `multipart/form-data` (Image Uploads).
+- bcrypt        : Library for hashing passwords (security).
+- jsonwebtoken  : For generating and verifying JWT tokens (User Authentication).
+- cors          : Enables Cross-Origin Resource Sharing (allows frontend to talk to backend).
+- dotenv        : Manages environment variables.
+
+II. PYTHON PACKAGES (AI Engine)
+-------------------------------
+Location: /web_app/server/inference.py & YOLOv5
+Install with: pip install -r requirements.txt (standard YOLOv5 reqs)
+
+Key Libraries Used:
+- torch (PyTorch) : The core deep learning framework for running the model.
+- torchvision     : Image transformations and utilities for PyTorch.
+- opencv-python   : For image processing (reading, saving, drawing boxes).
+- pandas          : Data analysis (used by YOLOv5 internals).
+- PyYAML          : Parsing YAML configuration files.
+- tqdm            : Progress bars (used by YOLOv5).
+- seaborn         : Visualization (used by YOLOv5).
+- matplotlib      : Plotting (used by YOLOv5).
+- requests        : HTTP requests (downloading initial assets).
+- psutil          : System monitoring utilities.
+
+III. SYSTEM REQUIREMENTS
+------------------------
+- Node.js (v14 or higher)
+- Python (v3.8 or higher)
+- SQLite3 (Pre-installed with Node package)

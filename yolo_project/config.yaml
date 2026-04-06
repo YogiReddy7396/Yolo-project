@@ -1,0 +1,14 @@
+path: /Volumes/Personal/yolo_project/waste_detection # Dataset root dir
+train: train/images
+val: valid/images
+test: test/images
+
+# Classes
+nc: 5  # number of classes
+names: ['Glass', 'Metal', 'Paper', 'Plastic', 'Waste']
+
+# Training Params
+epochs: 50
+batch_size: 16
+img_size: 640
+device: mps # Metal Performance Shaders

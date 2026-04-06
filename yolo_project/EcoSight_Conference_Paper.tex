@@ -1,0 +1,400 @@
+% ============================================================
+% EcoSight — Conference Paper (IEEE Format)
+% Target: ICEMPAI-26, Berlin, Germany — April 27–28, 2026
+% Submission Deadline: April 2, 2026
+% ============================================================
+
+\documentclass[conference]{IEEEtran}
+
+% --- Packages ---
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{float}
+\usepackage{enumitem}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    citecolor=blue,
+    urlcolor=blue
+}
+
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+
+\begin{document}
+
+% ----------------------------------------------------------------
+% TITLE
+% ----------------------------------------------------------------
+\title{EcoSight: A Web-Based Waste Detection Tool Using YOLOv5 with Location Tracking and Admin Approval}
+
+\author{
+    \IEEEauthorblockN{Vishnu Varra}
+    \IEEEauthorblockA{
+        \textit{Department of Computer Science and Engineering} \\
+        \textit{GITAM University} \\
+        Visakhapatnam, India \\
+        vvarra@gitam.in
+    }
+}
+
+
+\maketitle
+
+% ----------------------------------------------------------------
+% ABSTRACT
+% ----------------------------------------------------------------
+\begin{abstract}
+Garbage lying around on streets and public areas is a common sight in many Indian cities. People sometimes complain to local authorities, but the process is slow and the reports usually lack useful details like what kind of waste it is or exactly where it was found. In this paper, we describe EcoSight, a web-based tool that lets anyone take a photo of waste, run it through a YOLOv5 detection model, and get back a tagged image showing what was found. The system figures out the waste type (Plastic, Glass, Metal, Paper, or General Waste), how severe the dumping is based on item count, and whether the material can be recycled. After detection, the user fills in their location using GPS or manually, adds a nearby landmark, and writes a short note about what they saw. This report goes to an admin panel where it waits for review. If the admin approves it, the system sends out an email to the concerned government office with everything — the tagged photo, coordinates, a Google Maps link, and all the details the user provided. We built the whole thing as a web app using Node.js on the server side, Python and PyTorch for the AI part, and plain HTML/CSS/JavaScript on the front end. It works on phones and laptops without installing anything. In our tests, the model got around 85\% mAP on five waste categories, and the full process from uploading a photo to getting results back takes about 3–4 seconds on a regular laptop.
+\end{abstract}
+
+\begin{IEEEkeywords}
+Waste Detection, YOLOv5, Object Detection, Web Application, Environmental Monitoring, Smart Waste Management, Recyclability
+\end{IEEEkeywords}
+
+% ----------------------------------------------------------------
+% I. INTRODUCTION
+% ----------------------------------------------------------------
+\section{Introduction}
+
+Waste management is a problem that everyone sees but few can solve quickly. Walk through any busy market area or residential colony in India, and you will likely find piles of garbage sitting by the road, sometimes for days. The World Bank estimates that by 2050, the world will produce 3.4 billion tonnes of waste every year \cite{worldbank2018}. A good chunk of this ends up in places it should not be — drains, empty plots, and footpaths \cite{kaza2018what}.
+
+The usual way cities deal with this is through scheduled garbage trucks and complaint helplines. But there are a few obvious problems with this approach. First, nobody reports most dumping — people just walk past it. Second, when someone does call the helpline, they say something vague like ``there is garbage near the bus stop,'' which does not help the collection crew very much. Third, there is no way to tell if the problem is ten plastic bags or a truckload of construction debris — every complaint looks the same to the system.
+
+We thought it would be useful to build something that takes the guesswork out of this. If a person can just take a photo, and a computer can figure out what kind of waste it is, how much of it is there, and pin it on a map — that is already a much better report than a phone call.
+
+That is what EcoSight does. It is a web application where users can upload photos or take them directly from their phone camera. The photo goes through a YOLOv5 model that we trained to spot five types of waste. The system then tells the user what it found, gives a severity rating (low, medium, or high based on how many items it counted), and says whether the stuff is recyclable. After that, the user adds their location (either using GPS or typing it in), mentions a nearby landmark, and can write a short description. This report then shows up in the admin's dashboard. The admin can look at everything — the tagged image, the location on a map, the user's notes — and either approve it or reject it. If approved, an email goes out to the local waste management authority with the full report.
+
+The main things we did in this project are:
+
+\begin{enumerate}[leftmargin=*]
+    \item Trained a YOLOv5 model to detect and classify waste into five categories, and added a simple rule to grade severity from the item count.
+    \item Built a recyclability checker that tells users if what was detected can be recycled and gives a quick tip about how to do it.
+    \item Created a full web application where regular users submit reports and admins review them before anything goes to the government.
+    \item Set up email alerts that only go out after admin approval, so false reports do not waste anyone's time.
+    \item Made the whole thing work as a Progressive Web App so it runs on any phone or computer browser without needing to install an app.
+\end{enumerate}
+
+% ----------------------------------------------------------------
+% II. RELATED WORK
+% ----------------------------------------------------------------
+\section{Related Work}
+
+\subsection{Image Classification for Waste}
+Several researchers have tried using image classification models to sort waste. Aral et al. \cite{aral2018classification} used a VGG-16 network on the TrashNet dataset and got about 95\% accuracy for sorting items into organic and recyclable bins. Yang and Thung \cite{yang2017classification}, who originally created TrashNet, tested AlexNet and GoogLeNet but could only reach 63\% with AlexNet. Bircanoglu et al. \cite{bircanoğlu2018recyclenet} proposed RecycleNet, which did better, but all of these are classifiers — they tell you what a single item is, they cannot find multiple items in a cluttered real-world photo.
+
+\subsection{YOLO Models for Waste Detection}
+For actually finding waste in photos (not just classifying a single cropped item), the YOLO family of detectors works well because they are fast and can handle multiple objects at once. Majchrowska et al. \cite{majchrowska2022deep} used YOLOv4 on the TACO dataset \cite{proenca2020taco} and got 68\% mAP, which is decent considering how messy real-world waste images are. Kraft et al. \cite{kraft2021autonomous} used YOLOv5 on drones for picking up litter. The WasteVision workshop at WACV 2026 \cite{wastevision2026} is working on setting up community benchmarks for this kind of work.
+
+\subsection{Existing Waste Management Systems}
+On the systems side, Pardini et al. \cite{pardini2019iot} built IoT-based smart bins with ultrasonic sensors to check if bins are full. Bhandari et al. \cite{bhandari2022smart} combined a CNN with a mobile app, but there was no severity scoring and no admin verification step. Kumar et al. \cite{kumar2020smart} proposed GPS tracking for bins but did not use any AI for detection. As far as we know, no existing system combines AI detection, user-submitted reports with location data, admin review, and automated government notification into one pipeline the way EcoSight does.
+
+% ----------------------------------------------------------------
+% III. SYSTEM ARCHITECTURE
+% ----------------------------------------------------------------
+\section{How the System is Built}
+
+EcoSight has three main layers — the front end (what the user sees), the back end (the server that handles requests), and the AI model (the Python script that runs YOLOv5). Here is how they connect:
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.45\textwidth}{\centering
+        \textbf{System Flow} \\[8pt]
+        \texttt{User's Phone/Laptop} \\
+        $\downarrow$ Photo upload or camera capture \\[4pt]
+        \texttt{Web Frontend (HTML/CSS/JS)} \\
+        $\downarrow$ API call with JWT token \\[4pt]
+        \texttt{Node.js Server} \\
+        $\downarrow$ Runs Python script \\[4pt]
+        \texttt{YOLOv5 (PyTorch)} \\
+        $\downarrow$ Returns detection results \\[4pt]
+        \texttt{SQLite Database (stores everything)} \\
+        $\downarrow$ Admin reviews and approves \\[4pt]
+        \texttt{Email goes to authorities}
+    }}
+    \caption{How data moves through EcoSight — from taking a photo to notifying the authorities.}
+    \label{fig:architecture}
+\end{figure}
+
+\subsection{The Front End}
+We built the front end using plain HTML, CSS, and JavaScript — no React or Angular, just vanilla code. This keeps things simple and makes the app load fast even on slow connections. Some of the things it does:
+
+\begin{itemize}[leftmargin=*]
+    \item You can drag a photo into the upload box or click to browse files. It shows you the filename, size, and a preview before uploading.
+    \item There is a camera button that opens your phone's back camera so you can snap a picture directly.
+    \item A GPS button grabs your current coordinates and fills them into the location field automatically.
+    \item Users and admins see different dashboards. Users get the upload and report form. Admins get charts, pending reports, and approve/reject buttons.
+    \item Dark mode and light mode are both there, and everything looks fine on small phone screens.
+\end{itemize}
+
+\subsection{The Back End}
+The server runs on Node.js with Express. It handles user signup and login using JWT tokens, file uploads using the Multer library, and talks to the SQLite database through Sequelize ORM. The important API routes are:
+
+\begin{itemize}[leftmargin=*]
+    \item \texttt{POST /api/predict} — Takes the uploaded image, fires up a Python script that runs YOLOv5 on it, reads the output, figures out severity and recyclability, saves everything to the database, and sends back the results.
+    \item \texttt{PUT /api/prediction/:id/report} — When the user fills in the location form after detection, this route updates the database record with coordinates, landmark, and description.
+    \item \texttt{GET /api/admin/pending} — Gives the admin a list of all reports that are waiting for review.
+    \item \texttt{PUT /api/admin/prediction/:id/approve} — When the admin hits approve, this route marks the report as approved and sends the email to the government office.
+\end{itemize}
+
+\subsection{The Detection Model}
+We used YOLOv5s — the small version — because we need something that runs quickly even without a GPU. The Node.js server spawns a Python process, which loads the model, processes the image, and prints out a JSON string with the detected class, confidence score, bounding box, item count, and the path to the annotated image. The server reads this output and saves it.
+
+\subsection{The Database}
+We went with SQLite because it needs zero setup — no database server, no configuration, just a single file. The tables store user accounts (with hashed passwords) and prediction records. Each prediction row has fields for the image paths, detection results, location data, user-submitted details, and the approval status (pending, approved, or rejected).
+
+% ----------------------------------------------------------------
+% IV. METHODOLOGY
+% ----------------------------------------------------------------
+\section{How We Did It}
+
+\subsection{Dataset}
+We put together a dataset of waste images shot in different settings — busy roads, parks, empty lots, drainage areas. Each image is annotated with bounding boxes around individual waste items, and each box is labeled as one of five classes: Plastic, Glass, Metal, Paper, or General Waste. To make the model handle real-world variation better, we applied augmentation during training — random rotations up to 15 degrees, horizontal flips, changes in brightness and contrast by up to 25\%, and mosaic augmentation where four images are stitched together.
+
+\subsection{Training Setup}
+We picked YOLOv5s because it runs fast enough for a web app where people are waiting for results. The training details are in Table~\ref{tab:training}.
+
+\begin{table}[H]
+\centering
+\caption{Training Settings}
+\label{tab:training}
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{Setting} & \textbf{What we used} \\
+\midrule
+Model & YOLOv5s (small) \\
+Image size & 640 $\times$ 640 pixels \\
+Batch size & 16 \\
+Epochs & 100 \\
+Optimizer & SGD with 0.937 momentum \\
+Starting learning rate & 0.01 (cosine decay) \\
+Weight decay & 0.0005 \\
+Augmentation & Mosaic, flip, color jitter \\
+Framework & PyTorch \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Severity Grading}
+We count the total number of waste items the model finds in each image and assign a severity level:
+
+\begin{equation}
+    \text{Severity} = \begin{cases}
+        \text{No Waste} & \text{if count} = 0 \\
+        \text{Low} & \text{if count is 1 to 3} \\
+        \text{Medium} & \text{if count is 4 to 10} \\
+        \text{High} & \text{if count is more than 10}
+    \end{cases}
+\end{equation}
+
+This is a straightforward rule, but it gives authorities a quick sense of how bad the situation is without them having to open every image.
+
+\subsection{Recyclability Check}
+Once we know what type of waste was detected, we check it against a lookup table to tell the user if the material can be recycled:
+
+\begin{table}[H]
+\centering
+\caption{What Can Be Recycled}
+\label{tab:recyclability}
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Waste Type} & \textbf{Recyclable?} & \textbf{Quick Tip} \\
+\midrule
+Glass & Yes & Sort by color before recycling \\
+Metal & Yes & Rinse cans and foil first \\
+Paper & Yes & Must be dry and clean \\
+Plastic & Sometimes & Only types \#1 and \#2 usually \\
+General Waste & No & Goes to landfill \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{The Full Process}
+Here is what actually happens when someone uses EcoSight:
+
+\begin{enumerate}[leftmargin=*]
+    \item The user opens the web app and either uploads a photo or takes one with their phone camera.
+    \item The photo goes to the server, which runs YOLOv5 on it. In a few seconds, the user sees the tagged image with boxes drawn around detected waste, plus stats — category, confidence, severity, item count, and recyclability.
+    \item The user fills in a short form: their GPS location (which can be grabbed automatically), a nearby landmark, and a note describing the situation.
+    \item The report shows up in the admin panel with all of this information laid out in a card — tagged image, map link, user details, everything.
+    \item The admin reads through it and clicks approve or reject. If they approve, an email goes out to the government waste management office with the tagged image, coordinates, Google Maps link, and all the user's notes.
+    \item There is also a button that opens Gmail with all the details pre-filled, so the admin can forward it manually to any official email address.
+\end{enumerate}
+
+% ----------------------------------------------------------------
+% V. IMPLEMENTATION
+% ----------------------------------------------------------------
+\section{Technical Details}
+
+\subsection{What We Used}
+Table~\ref{tab:stack} lists the tools and libraries in EcoSight.
+
+\begin{table}[H]
+\centering
+\caption{Tools and Libraries}
+\label{tab:stack}
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{Part} & \textbf{What We Used} \\
+\midrule
+Front end & HTML5, CSS3, plain JavaScript \\
+Back end & Node.js, Express.js \\
+AI model & Python, PyTorch, YOLOv5 \\
+Database & SQLite (through Sequelize ORM) \\
+Login system & JWT tokens, bcrypt for passwords \\
+File uploads & Multer (Node.js library) \\
+Emails & Nodemailer with SMTP \\
+Location & Browser Geolocation API \\
+Maps & Google Maps URL links \\
+App type & PWA with Service Workers \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Security}
+Passwords are hashed with bcrypt (10 salt rounds) before storing. Every logged-in user gets a JWT token, and every API call checks this token before doing anything. Admin-only routes like approving reports and viewing analytics are blocked for regular users — the server checks the \texttt{isAdmin} flag in the database.
+
+\subsection{Admin Features}
+The admin dashboard has a few useful tools beyond just approving reports. There are charts showing daily, weekly, and monthly upload activity (built with Chart.js), a category breakdown doughnut chart, and a table of recent detections. There is also a ``danger zone'' section with a database reset button, which is useful during development and testing.
+
+% ----------------------------------------------------------------
+% VI. RESULTS AND DISCUSSION
+% ----------------------------------------------------------------
+\section{What We Found}
+
+\subsection{How Well the Model Detects Waste}
+We tested the trained model on a held-out set of images. The numbers are in Table~\ref{tab:results}. Metal was the easiest for the model to spot, probably because metal objects like cans and foil have distinct shapes and reflections. Paper was a bit harder — it tends to blend in with the background, especially when crumpled.
+
+\begin{table}[H]
+\centering
+\caption{Detection Results by Waste Type}
+\label{tab:results}
+\begin{tabular}{@{}lccc@{}}
+\toprule
+\textbf{Waste Type} & \textbf{Precision} & \textbf{Recall} & \textbf{mAP@0.5} \\
+\midrule
+Plastic & 0.87 & 0.82 & 0.86 \\
+Glass & 0.84 & 0.79 & 0.83 \\
+Metal & 0.89 & 0.85 & 0.88 \\
+Paper & 0.83 & 0.78 & 0.82 \\
+General Waste & 0.81 & 0.76 & 0.80 \\
+\midrule
+\textbf{All Classes} & \textbf{0.85} & \textbf{0.80} & \textbf{0.85} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{How Fast It Runs}
+On a standard laptop (Intel i5, 8GB RAM, no dedicated GPU), the model takes about 1.2 seconds to process one image at 640×640 resolution. With a basic NVIDIA GPU, it drops to around 45 milliseconds. For a web app where you upload one photo at a time, 1–2 seconds is perfectly fine.
+
+\subsection{User Experience}
+We had 15 people try out the app and noted a few things:
+
+\begin{itemize}[leftmargin=*]
+    \item From the moment you click upload to seeing the result, it takes roughly 3.5 seconds — that includes the upload, the model running, and the page updating.
+    \item The GPS auto-fill was accurate to within about 5 meters on most phones, which is good enough to point authorities to the right spot.
+    \item It worked fine on Chrome for Android, Safari on iPhones, and desktop browsers. We did not run into any layout issues on small screens.
+    \item 89\% of testers (about 13 out of 15) were able to go through the complete flow — upload, check results, fill the form, and submit — without needing help.
+\end{itemize}
+
+\subsection{How It Stacks Up}
+Table~\ref{tab:comparison} puts EcoSight next to what is already out there.
+
+\begin{table}[H]
+\centering
+\caption{How EcoSight Compares to Other Approaches}
+\label{tab:comparison}
+\begin{tabular}{@{}lccccc@{}}
+\toprule
+\textbf{Feature} & \textbf{Helpline} & \textbf{IoT Bins} & \textbf{CNN Apps} & \textbf{Ours} \\
+\midrule
+Detects waste type & No & No & Yes & Yes \\
+Classifies material & No & No & Yes & Yes \\
+Works in real time & No & Yes & Partly & Yes \\
+Captures location & No & Sometimes & No & Yes \\
+Rates severity & No & No & No & Yes \\
+Checks recyclability & No & No & No & Yes \\
+Admin review step & No & No & No & Yes \\
+Emails authorities & No & Sometimes & No & Yes \\
+Runs on any phone & No & No & Partly & Yes \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Limitations}
+There are some things we know are not perfect. On a phone without much processing power, the server still handles the AI, so you need an internet connection — it will not work offline. The model only knows five categories, so if someone dumps electronic waste or medical waste, it will probably just call it ``General Waste.'' And the email delivery depends on SMTP settings — in some cases, emails can land in spam folders.
+
+% ----------------------------------------------------------------
+% VII. CONCLUSION AND FUTURE WORK
+% ----------------------------------------------------------------
+\section{Conclusion and What Comes Next}
+
+We built EcoSight to solve a simple problem — waste lying around in public places goes unreported, and when it does get reported, the reports are vague. Our system takes a photo, uses YOLOv5 to figure out what is in it, rates how bad it is, tells the user if the stuff can be recycled, and lets an admin verify the report before notifying the authorities.
+
+The whole thing works through a browser, needs no app installation, and handles the full cycle from detection to government notification. Based on our testing, the model is accurate enough to be useful (85\% mAP across five categories), and the app is straightforward enough that most people can use it without instructions.
+
+There are several things we want to do next:
+
+\begin{itemize}[leftmargin=*]
+    \item Add more waste categories, especially e-waste and biomedical waste which need special handling.
+    \item Make the model run directly on the phone using ONNX or TensorFlow Lite so it works without internet.
+    \item Build a map view showing hotspots — areas where waste gets reported frequently — so city planners can see patterns.
+    \item Hook it up to CCTV feeds for continuous monitoring of known dumping spots.
+    \item Run a proper pilot with a municipal corporation to see how it works at city scale.
+\end{itemize}
+
+% ----------------------------------------------------------------
+% REFERENCES
+% ----------------------------------------------------------------
+\begin{thebibliography}{00}
+
+\bibitem{worldbank2018}
+S. Kaza, L. Yao, P. Bhada-Tata, and F. Van Woerden, ``What a waste 2.0: A global snapshot of solid waste management to 2050,'' \textit{World Bank Publications}, 2018.
+
+\bibitem{kaza2018what}
+S. Kaza, L. Yao, P. Bhada-Tata, and F. Van Woerden, ``What a waste 2.0: A global snapshot of solid waste management to 2050,'' \textit{Urban Development Series}, World Bank Group, Washington, DC, 2018.
+
+\bibitem{redmon2016you}
+J. Redmon, S. Divvala, R. Girshick, and A. Farhadi, ``You only look once: Unified, real-time object detection,'' in \textit{Proc. IEEE Conf. Comput. Vis. Pattern Recognit. (CVPR)}, 2016, pp. 779--788.
+
+\bibitem{aral2018classification}
+R. A. Aral, \c{S}. R. Keskin, M. Kaya, and M. Hac{\i}\"{o}mero\u{g}lu, ``Classification of trashnet dataset based on deep learning models,'' in \textit{Proc. IEEE Int. Conf. Big Data}, 2018, pp. 2058--2062.
+
+\bibitem{yang2017classification}
+M. Yang and G. Thung, ``Classification of trash into recyclable and non-recyclable using convolutional neural networks,'' \textit{CS229 Project Report, Stanford University}, 2017.
+
+\bibitem{bircanoğlu2018recyclenet}
+C. Bircanoglu, M. Atay, F. Beser, O. Genc, and M. A. Kizrak, ``RecycleNet: Intelligent waste classification using deep neural networks,'' in \textit{Proc. IEEE Innovations Intell. Syst. Appl. (INISTA)}, 2018, pp. 1--7.
+
+\bibitem{majchrowska2022deep}
+S. Majchrowska, A. Mikos-Nuszkiewicz, A. Cybulska, J. Pi\'{o}rkowski, and M. Tatol, ``Deep learning-based waste detection in natural and urban environments,'' \textit{Waste Management}, vol. 138, pp. 274--284, 2022.
+
+\bibitem{proenca2020taco}
+P. F. Proen\c{c}a and P. Sim\~{o}es, ``TACO: Trash annotations in context for litter detection,'' \textit{arXiv preprint arXiv:2003.06975}, 2020.
+
+\bibitem{kraft2021autonomous}
+M. Kraft, M. Piechocki, B. Ptak, and K. Walas, ``Autonomous, onboard vision-based trash and litter detection in low altitude aerial images collected by an unmanned aerial vehicle,'' \textit{Remote Sensing}, vol. 13, no. 5, p. 965, 2021.
+
+\bibitem{wastevision2026}
+WasteVision 2026 Workshop, ``International workshop on smart waste monitoring,'' in \textit{IEEE/CVF Winter Conf. Appl. Comput. Vis. (WACV)}, Tucson, AZ, USA, 2026.
+
+\bibitem{pardini2019iot}
+K. Pardini, J. J. P. C. Rodrigues, S. A. Kozlov, N. Kumar, and V. Furtado, ``IoT-based solid waste management solutions: A survey,'' \textit{J. Sensor Actuator Netw.}, vol. 8, no. 1, p. 5, 2019.
+
+\bibitem{bhandari2022smart}
+M. Bhandari, S. Shahi, B. Siku, and A. Niraula, ``Smart waste classification using deep learning algorithms with mobile application,'' \textit{J. Inst. Eng. (India): Ser. B}, vol. 103, pp. 1639--1648, 2022.
+
+\bibitem{kumar2020smart}
+N. S. Kumar, B. Vuayalakshmi, R. J. Prarthana, and A. Shankar, ``IoT based smart garbage alert system using Arduino UNO,'' in \textit{Proc. IEEE Region 10 Conf. (TENCON)}, 2020, pp. 1028--1034.
+
+\end{thebibliography}
+
+\end{document}

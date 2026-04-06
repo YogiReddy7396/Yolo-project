@@ -1,0 +1,18 @@
+{
+    "name": "ecosight-v3",
+    "version": "3.0.0",
+    "description": "EcoSight - AI-Powered Waste Detection & Classification",
+    "scripts": {
+        "start": "node web_app/server/server.js",
+        "dev": "node --watch web_app/server/server.js",
+        "install:server": "cd web_app/server && npm install",
+        "install:python": "pip3 install -r requirements.txt",
+        "setup": "npm run install:server && npm run install:python"
+    },
+    "keywords": [
+        "waste-detection",
+        "yolov5",
+        "ecosight"
+    ],
+    "license": "ISC"
+}

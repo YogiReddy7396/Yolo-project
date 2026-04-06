@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile - EcoSight</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#000000">
+    <!-- SVGs for Icons will be used inline or via img -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body class="light-mode">
+
+    <nav class="navbar">
+        <div class="brand" onclick="window.location.href='dashboard.html'" style="cursor: pointer;">EcoSight</div>
+        <!-- Nav Icons Container -->
+        <div class="nav-icons" style="display: flex; align-items: center; gap: 20px;">
+            <!-- Theme Toggle -->
+            <button class="icon-btn" id="theme-toggle" title="Toggle Theme">
+                <!-- Sun Icon -->
+                <svg id="sun-icon" class="icon-svg" viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="5"></circle>
+                    <line x1="12" y1="1" x2="12" y2="3"></line>
+                    <line x1="12" y1="21" x2="12" y2="23"></line>
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                    <line x1="1" y1="12" x2="3" y2="12"></line>
+                    <line x1="21" y1="12" x2="23" y2="12"></line>
+                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                </svg>
+                <!-- Moon Icon -->
+                <svg id="moon-icon" class="icon-svg" style="display:none" viewBox="0 0 24 24">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                </svg>
+            </button>
+
+            <!-- User (Profile) -->
+            <button class="icon-btn" onclick="window.location.href='profile.html'" title="My Profile">
+                <svg class="icon-svg" viewBox="0 0 24 24">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+            </button>
+
+            <!-- Logout -->
+            <button class="icon-btn" onclick="logout()" title="Log Out">
+                <svg class="icon-svg" viewBox="0 0 24 24">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                    <polyline points="16 17 21 12 16 7"></polyline>
+                    <line x1="21" y1="12" x2="9" y2="12"></line>
+                </svg>
+            </button>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h2 style="margin-top: 20px;">My Profile</h2>
+
+        <div class="dashboard-grid" style="grid-template-columns: 1fr;">
+
+            <!-- User Info Card -->
+            <div class="card" style="display: flex; gap: 20px; align-items: center;">
+                <div
+                    style="font-size: 3rem; background: var(--border); width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                    👤
+                </div>
+                <div>
+                    <h2 id="profile-name" style="margin: 0;">Loading...</h2>
+                    <p id="profile-email" style="color: var(--text-secondary); margin: 5px 0;">...</p>
+                    <p id="profile-joined" style="font-size: 0.8rem; color: var(--text-secondary);">Joined: ...</p>
+                </div>
+                <div style="margin-left: auto; text-align: right;">
+                    <h3 style="margin: 0; color: var(--accent);">Total Detections</h3>
+                    <h1 id="profile-total" style="margin: 0; font-size: 3rem;">0</h1>
+                </div>
+            </div>
+
+            <!-- Severity Stats Row -->
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;">
+                <div class="card" style="border-left: 5px solid #4CAF50;">
+                    <h3>Low Severity</h3>
+                    <h1 id="count-low">0</h1>
+                </div>
+                <div class="card" style="border-left: 5px solid #FFC107;">
+                    <h3>Medium Severity</h3>
+                    <h1 id="count-medium">0</h1>
+                </div>
+                <div class="card" style="border-left: 5px solid #F44336;">
+                    <h3>High Severity</h3>
+                    <h1 id="count-high">0</h1>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+                <div class="card">
+                    <h3>My Stats</h3>
+                    <canvas id="userChart"></canvas>
+                </div>
+                <div class="card">
+                    <h3>My Activity</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Result</th>
+                                <th>Confidence</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="profile-activity-table">
+                            <!-- Rows injected here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Comparison Modal -->
+    <div id="image-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal()">&times;</span>
+            <div class="carousel-container">
+                <button class="nav-btn" onclick="prevSlide()">&lt;</button>
+                <div class="slide-view">
+                    <h3 id="modal-label">Raw Image</h3>
+                    <img id="modal-img" src="" alt="View">
+                </div>
+                <button class="nav-btn" onclick="nextSlide()">&gt;</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/main.js"></script>
+</body>
+
+</html>

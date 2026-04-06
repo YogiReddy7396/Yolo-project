@@ -1,0 +1,27 @@
+# Core Physics & AI Engines
+torch>=2.0.0
+torchvision>=0.15.0
+
+# Base Libraries
+numpy>=1.23.5
+opencv-python>=4.1.1
+pillow>=10.3.0
+PyYAML>=5.3.1
+requests>=2.32.2
+scipy>=1.4.1
+tqdm>=4.66.3
+psutil  # System monitoring
+gitpython>=3.1.30
+
+# Data Analysis & Plotting
+pandas>=1.1.4
+matplotlib>=3.3
+seaborn>=0.11.0
+
+# Notebook Support
+ipykernel
+jupyter
+
+# YOLOv5 Specific
+ultralytics>=8.2.64
+thop>=0.1.1

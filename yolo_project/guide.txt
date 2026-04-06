@@ -1,0 +1,90 @@
+WASTE DETECTION APPLICATION - OPERATIONAL GUIDE
+===============================================
+
+This document outlines the step-by-step procedures for configuring and executing the Garbage Detection AI project.
+
+Step 1: PREREQUISITES
+
+Ensure the following software is installed on your system before proceeding.
+
+1. Node.js (Required for Website Backend)
+   - Action: Download and install the LTS Version.
+   - Source: https://nodejs.org/
+   - Verification: Open your terminal and execute the command: node -v
+
+For node.js Mac installation using curl: refer: https://nodejs.org/en/download/current
+
+
+2. Need to have python installed;
+
+
+
+
+Step 2: PROJECT INSTALLATION
+
+Follow these steps to install the necessary software dependencies.
+
+A. Navigate to Project
+   1. Open Terminal (macOS) or Command Prompt (Windows).
+   2. Change directory to the project folder:
+      cd /path/to/yolo_project
+
+B. Install AI Dependencies
+   Execute the following command to install Python libraries:
+   pip install -r requirements.txt
+   (Note: If 'pip' is not recognized, attempt using 'pip3')
+
+C. Install Web Server Dependencies
+   1. Navigate to the server directory:
+      cd web_app/server
+   2. Install Node modules:
+      npm install
+
+
+
+
+
+Step 3: EXECUTION
+
+Once installation is complete, initialize the server.
+
+1. Ensure your terminal is located in the 'web_app/server' directory.
+2. Execute the start command:
+   node server.js
+3. Confirm successful launch by checking for the following logs:
+   "Server running on http://localhost:3000"
+   "Database connected..."
+
+
+
+
+
+Step 4: USAGE INSTRUCTIONS
+
+1. Launch a web browser (Chrome, Safari, or Edge).
+2. Navigate to the address: http://localhost:3000
+3. Sign Up: Create a new user account.
+   Note: The first registered user is automatically assigned Admin privileges.
+4. Dashboard:
+   - Select "Upload Image" to submit a photograph.
+   - Allow the AI model time to process the input.
+   - View the classification results.
+
+
+
+
+Step 5: TROUBLESHOOTING
+
+Common issues and their resolutions:
+
+- Issue: "Module not found" error.
+  Resolution: Re-run 'npm install' while inside the 'web_app/server' directory.
+
+- Issue: "Python not found" error.
+  Resolution: Verify that Python is installed and has been added to your system PATH variables.
+
+- Issue: Database Reset required.
+  Resolution: Log in as the Admin user, navigate to the Admin Dashboard, locate the "Danger Zone" Step, and select "Reset Database".
+ 
+
+Another way to reset database is: just the database.sqlite which can be found in /web_app/server/
